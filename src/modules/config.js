@@ -52,6 +52,8 @@ const Config = () => {
 
     enableMentionLog: true,
     reverseMentionLog: false,
+    enableEventsLog: true,
+    reverseEventsLog: false,
 
     agreementVersion: null,
 
@@ -551,10 +553,10 @@ const Config = () => {
 
       // --- MENTION LOG
       {
-        name: "mentionLog",
-        label: "Mentions",
+        name: "logging",
+        label: "Logging",
         content: {
-          groups: [{ name: "mentions", label: "Mentions Log" }],
+          groups: [{ name: "mentions", label: "Mentions Log" }, { name: "events", label: "Events Log" }],
           inputs: [
             // mentions
             // enableMentionLog
@@ -589,6 +591,39 @@ const Config = () => {
               type: "mentions-log",
               value: state.get("mentions"),
               group: "mentions",
+            },
+            // eventsLog
+            {
+              name: "enableEventsLog",
+              label: "Enable Events Logging",
+              type: "toggle",
+              value: cfg.enableEventsLog,
+              group: "events",
+              help: {
+                label: "?",
+                text: `<p>Enabling this option will temporarily store events involving you, your clan, or system messages (e.g. wartoys, nukes, admin toast notifications)</p>
+                <p>This log WILL clear every time you refresh or close the page.</p>`,
+              },
+            },
+            // reverseEventsLog
+            {
+              name: "reverseEventsLog",
+              label: "Show Newest First",
+              type: "toggle",
+              value: cfg.reverseEventsLog,
+              group: "events",
+              help: {
+                label: "?",
+                text: `<p>Enabling this option set the events log to list in order of newest to oldest.</p><p>After toggling this option, you must close and reopen the settings window to see the changes.</p>`,
+              },
+            },
+            // eventsLog
+            {
+              name: "eventsLog",
+              label: "Events Log",
+              type: "events-log",
+              value: state.get("events"),
+              group: "events",
             },
           ],
         },

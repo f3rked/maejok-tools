@@ -234,33 +234,33 @@ export const getMessageType = (element) => {
     [
       "message",
       hasClass(element, classes.message) ||
-        closestWithClass(element, classes.message),
+      closestWithClass(element, classes.message),
     ],
     [
       "emote",
       hasClass(element, classes.emote) ||
-        closestWithClass(element, classes.emote),
+      closestWithClass(element, classes.emote),
     ],
     [
       "roll",
       element.textContent.includes("rolls a 20-sided dice") &&
-        (hasClass(element, classes.emote) ||
-          closestWithClass(element, classes.emote)),
+      (hasClass(element, classes.emote) ||
+        closestWithClass(element, classes.emote)),
     ],
     [
       "clan",
       hasClass(element, classes.clan) ||
-        closestWithClass(element, classes.clan),
+      closestWithClass(element, classes.clan),
     ],
     [
       "system",
       hasClass(element, classes.system) ||
-        closestWithClass(element, classes.system),
+      closestWithClass(element, classes.system),
     ],
     [
       "consumable",
       hasClass(element, classes.consumable) ||
-        closestWithClass(element, classes.consumable),
+      closestWithClass(element, classes.consumable),
     ],
     [
       "tts",
@@ -417,12 +417,16 @@ export const scrollToBottom = () => {
   chat.scrollTop = chat.scrollHeight;
 };
 
-export const processChatMessage = (node, logMentions = true) => {
+export const processChatMessage = (node, logMentions = true, logEvents = true) => {
   const cfg = config.get();
   const message = new Message(node);
 
   if (logMentions) {
     processMentions(message);
+  }
+
+  if (logEvents) {
+    processEvents(message);
   }
 
   checkRoomChange(node);
@@ -771,10 +775,10 @@ export const startMaejokTools = async () => {
   toggleScanLines();
   toggleScreenTakeovers(config.get("hideScreenTakeovers"));
   observers.chat.start();
+  observers.modal.start();
 
   if (config.get("hideGlobalMissions")) {
     observers.body.start();
-    observers.modal.start();
   }
 
   const user = state.get("user");
@@ -978,6 +982,21 @@ function processMentions(message) {
   if (message.mentioned && cfg.enableMentionLog) {
     state.set("mentions", [
       ...state.get("mentions"),
+      { ...message, added: Date.now() },
+    ]);
+  }
+}
+
+function processEvents(message) {
+  if (!["system", "catastrophe"].includes(message.type)) {
+    return;
+  }
+
+  const cfg = config.get();
+
+  if (message.hasRelevantEvent && cfg.enableEventsLog) {
+    state.set("events", [
+      ...state.get("events"),
       { ...message, added: Date.now() },
     ]);
   }

@@ -12,6 +12,7 @@ export default class Message {
     this.timestamp = this.getTimestamp();
     this.mentions = this.getMentions();
     this.mentioned = this.isMentioned();
+    this.hasRelevantEvent = this.isRelevantEvent();
     this.html = this.getMessageHTML();
     this.fish = this.isFish();
     this.grand = false;
@@ -26,12 +27,19 @@ export default class Message {
       [ELEMENTS.chat.system.class]: "system",
       [ELEMENTS.chat.message.class]: "message",
       [ELEMENTS.chat.consumable.class]: "consumable",
+      [ELEMENTS.chat.catastrophe.class]: "catastrophe",
       [ELEMENTS.chat.clan.class]: "clan",
       [ELEMENTS.chat.tts.class]: "tts",
       [ELEMENTS.chat.sfx.class]: "sfx",
     };
 
     const classNames = this.node.className.split(" ");
+
+    //kinda hacky
+    if (classNames.includes(ELEMENTS.chat.catastrophe.class)) {
+      return "catastrophe";
+    }
+
     for (const className of classNames) {
       if (classMap.hasOwnProperty(className)) {
         const type = classMap[className];
@@ -53,8 +61,14 @@ export default class Message {
   }
 
   getMessageHTML() {
-    if (this.type !== "message") {
+    const validTypes = ["message", "catastrophe", "system", "clan"];
+    if (!validTypes.includes(this.type)) {
       return false;
+    }
+
+    if (this.type === "catastrophe" || this.type === "system" || this.type === "clan") {
+      console.log(this.node.outerHTML)
+      console.log(this.node)
     }
 
     return this.node.outerHTML || false;
@@ -74,10 +88,10 @@ export default class Message {
     this.staff = functions.hasClass(this.node, wesSelector)
       ? "wes"
       : functions.hasClass(this.node, fishSelector)
-      ? "fish"
-      : functions.hasClass(this.node, adminSelector)
-      ? "admin"
-      : false;
+        ? "fish"
+        : functions.hasClass(this.node, adminSelector)
+          ? "admin"
+          : false;
 
     const id = this.node.getAttribute("data-user-id") || false;
 
@@ -93,7 +107,7 @@ export default class Message {
   }
 
   getBody() {
-    const validTypes = ["message", "emote", "happening", "system"];
+    const validTypes = ["message", "emote", "catastrophe", "system"];
 
     if (!validTypes.includes(this.type)) {
       return;
@@ -106,10 +120,14 @@ export default class Message {
 
     const body = functions.getElementText(this.node, selector) || false;
 
-    const html =
+    let html =
       this.type === "message"
         ? this.node.querySelector(selector).innerHTML || false
         : false;
+
+    if (this.type === "catastrophe") {
+      html = this.node.querySelector(`.${ELEMENTS.chat[this.type].body.class}`)?.innerHTML || false;
+    }
 
     return { body, html };
   }
@@ -167,6 +185,44 @@ export default class Message {
     const isMentioned = lowercaseMentions.includes(lowercaseDisplayName);
 
     return isMentioned;
+  }
+
+  isRelevantEvent() {
+    if (this.type == "system") {
+      const clan = state.get("user")?.clan?.tag?.toLowerCase();
+      if (!clan) {
+        return;
+      }
+
+      if (!this.body) {
+        return;
+      }
+
+      const clanMentioned = this.body.body.includes(clan);
+      if (clanMentioned) {
+        return true;
+      }
+    }
+
+    console.log(this.type);
+
+    if (this.type == "catastrophe") {
+      const user = state.get("user")?.displayName?.toLowerCase();
+      if (!user) {
+        return false;
+      }
+
+      const catastropheVictim = functions.getElementText(
+        this.node,
+        ELEMENTS.chat.catastrophe.receiver.selector
+      ) || false
+
+      if (catastropheVictim) {
+        return (catastropheVictim.toLowerCase() === user);
+      } else {
+        return false;
+      }
+    }
   }
 
   isFish() {

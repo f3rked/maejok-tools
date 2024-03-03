@@ -237,11 +237,23 @@ const Elements = {
       },
     },
     consumable: {
-      selector: `[class^="chat-message-happening_chat"]`,
+      selector: `.chat-message-happening_chat-message-happening__tYeDU:not(.chat-message-happening_catastrophe__ZqfDs)`,
       class: `chat-message-happening_chat-message-happening__tYeDU`,
       sender: {
         selector: `[class^="chat-message-happening_user"]`,
         class: `chat-message-happening_user__c_Ohh`,
+      },
+      body: {
+        selector: `[class^="chat-message-happening_message"]`,
+        class: `chat-message-happening_message__W13K6`,
+      },
+    },
+    catastrophe: {
+      selector: `[class^="chat-message-happening_catastrophe"]`,
+      class: `chat-message-happening_catastrophe__ZqfDs`,
+      receiver: {
+        selector: `[class^="chat-message-happening_display-name"]`,
+        class: `chat-message-happening_display-name__iQHJl`,
       },
       body: {
         selector: `[class^="chat-message-happening_message"]`,
@@ -473,6 +485,15 @@ const Elements = {
         },
       },
     },
+    events: {
+      class: "maejok-settings_events-list",
+      item: {
+        class: "maejok-settings_events-list-item",
+        remove: {
+          class: "maejok-settings_events-list-item-remove",
+        },
+      },
+    },
     config: {
       wrapper: { class: "maejok-settings-config-wrapper" },
       group: { class: "maejok-settings-config-input-group" },
@@ -590,6 +611,9 @@ const Elements = {
       class: "happening_happening__Ca2E7",
     },
   },
+  toast: {
+    class: "toast_toast__zhSlo"
+  }
 };
 
 export default Elements;

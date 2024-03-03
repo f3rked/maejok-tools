@@ -7,6 +7,7 @@ const State = () => {
     user: null,
     bigScreenState: false,
     mentions: [],
+    events: [],
     recentChatters: [],
     observers: {
       chat: null,
